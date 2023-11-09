@@ -2,42 +2,46 @@
 <html>
 
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width">
-  <title>replit</title>
-  <link href="style.css" rel="stylesheet" type="text/css" />
+	
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>replit</title>
+	<link href="style.css" rel="stylesheet" type="text/css" />
 </head>
 
 <body>
-  <input type="file" id="teamsSpreadsheet" accept=".xlsx">
-  <button onclick="handleUpload()">Upload Teams Spreadsheet</button>
+	<input type="file" id="teamsSpreadsheet" accept=".xlsx">
+<button onclick="handleUpload('teams')">Upload Teams Spreadsheet</button>
 
-  <script>
-    function handleUpload() {
-      const fileInput = document.getElementById("teamsSpreadsheet");
-      const file = fileInput.files[0];
-      const reader = new FileReader();
+<input type="file" id="gamesSpreadsheet" accept=".xlsx">
+<button onclick="handleUpload('games')">Upload Games Spreadsheet</button>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/shim.min.js">//Fix XLSX not defined</script>
+	<script>
+		function handleUpload() {
+			const fileInput = document.getElementById("teamsSpreadsheet");
+			const file = fileInput.files[0];
+			const reader = new FileReader();
 
-      reader.onload = function(e) {
-        const contents = e.target.result;
-        const jsonData = convertToJSON(contents);
-        console.log(jsonData);
-      };
+			reader.onload = function (e) {
+				const contents = e.target.result;
+				const jsonData = convertToJSON(contents);
+				console.log(jsonData);
+			};
 
-      reader.readAsBinaryString(file);
-    }
+			reader.readAsBinaryString(file);
+		}
 
-    function convertToJSON(contents) {
-      const data = new Uint8Array(contents);
-      let workbook = XLSX.read(data, {type:'array'});
-      let worksheet = workbook.Sheets[workbook.SheetNames[0]];
-      let jsonData = XLSX.utils.sheet_to_json(worksheet);
-      return jsonData;
-    }
-  </script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/luxon/3.4.3/luxon.min.js"></script>
-  <script src="script.js"></script>
-  <script src="luxon.js"></script>
+		function convertToJSON(contents) {
+			const data = new Uint8Array(contents);
+			let workbook = XLSX.read(data, {type: 'array'});
+			let worksheet = workbook.Sheets[workbook.SheetNames[0]];
+			let jsonData = XLSX.utils.sheet_to_json(worksheet);
+			return jsonData;
+		}
+	</script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/luxon/3.4.3/luxon.min.js"></script>
+	<script src="script.js"></script>
+	<script src="luxon.js"></script>
 
 
 </body>
