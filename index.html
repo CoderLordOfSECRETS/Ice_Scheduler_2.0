@@ -2,20 +2,22 @@
 <html>
 
 <head>
-	
+
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
 	<title>replit</title>
 	<link href="style.css" rel="stylesheet" type="text/css" />
+	<!-- use version 0.20.0 -->
+	<script lang="javascript" src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
 </head>
 
 <body>
 	<input type="file" id="teamsSpreadsheet" accept=".xlsx">
-<button onclick="handleUpload('teams')">Upload Teams Spreadsheet</button>
+	<button onclick="handleUpload('teams')">Upload Teams Spreadsheet</button>
 
-<input type="file" id="gamesSpreadsheet" accept=".xlsx">
-<button onclick="handleUpload('games')">Upload Games Spreadsheet</button>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/shim.min.js">//Fix XLSX not defined</script>
+	<input type="file" id="gamesSpreadsheet" accept=".xlsx">
+	<button onclick="handleUpload('games')">Upload Games Spreadsheet</button>
+
 	<script>
 		function handleUpload() {
 			const fileInput = document.getElementById("teamsSpreadsheet");
@@ -41,6 +43,7 @@
 	</script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/luxon/3.4.3/luxon.min.js"></script>
 	<script src="script.js"></script>
+	<script type="module" src="Filehandler.js"></script>
 	<script src="luxon.js"></script>
 
 
