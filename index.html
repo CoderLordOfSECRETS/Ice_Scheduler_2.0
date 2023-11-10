@@ -1,55 +1,24 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
 	<title>replit</title>
 	<link href="style.css" rel="stylesheet" type="text/css" />
 	<!-- use version 0.20.0 -->
 	<script lang="javascript" src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+	<script type="module" src="Modules/Filehandler.js"></script>
+	<script src="Frontend.js"></script>
+	<script type="module" src="Modules/Scheduling.js"></script>
+	<script src="luxon.js"></script>
 </head>
-
 <body>
 	<h1>Ice Scheduler (Beta)</h1>
 	<br>
 	<p>Import Files</p>
 	<input type="file" id="teamsSpreadsheet" accept=".xlsx">
-	<button onclick="handleUpload('teams')">Upload Teams Spreadsheet</button>
-
+	<button id="uploadTeamsBtn">Upload Teams Spreadsheet</button>
 	<input type="file" id="gamesSpreadsheet" accept=".xlsx">
-	<button onclick="handleUpload('games')">Upload Games Spreadsheet</button>
-
-	<script>
-		function handleUpload() {
-			const fileInput = document.getElementById("teamsSpreadsheet");
-			const file = fileInput.files[0];
-			const reader = new FileReader();
-
-			reader.onload = function (e) {
-				const contents = e.target.result;
-				const jsonData = convertToJSON(contents);
-				console.log(jsonData);
-			};
-
-			reader.readAsBinaryString(file);
-		}
-
-		function convertToJSON(contents) {
-			const data = new Uint8Array(contents);
-			let workbook = XLSX.read(data, {type: 'array'});
-			let worksheet = workbook.Sheets[workbook.SheetNames[0]];
-			let jsonData = XLSX.utils.sheet_to_json(worksheet);
-			return jsonData;
-		}
-	</script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/luxon/3.4.3/luxon.min.js"></script>
-	<script src="script.js"></script>
-	<script type="module" src="Filehandler.js"></script>
-	<script src="luxon.js"></script>
-
-
+	<button id="uploadGamesBtn">Upload Games Spreadsheet</button>
 </body>
-
 </html>

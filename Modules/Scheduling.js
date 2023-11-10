@@ -1,12 +1,9 @@
-let teams;
-let AvailableTimes = ['8:00 AM', '10:00 AM', '2:00 PM'];
-let schedule = {};
+import { convertToJSON } from './Modules/Filehandler.js';
 
-
-function createSchedule() {
-	for (let i = 0; i < teams.length; i++) {
-		schedule[teams[i]] = AvailableTimes[i];
-	}
-
-	console.log(schedule);
+function getTeamsSpreadsheetElement() {
+  return document.getElementById("teamsSpreadsheet");
 }
+// Assuming you have a function to fetch file contents, you can use it like this:
+const fileContents = getTeamsSpreadsheetElement();
+const jsonData = convertToJSON(fileContents);
+console.log(jsonData);

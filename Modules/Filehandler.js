@@ -1,33 +1,21 @@
-// @deno-types="https://cdn.sheetjs.com/xlsx-0.20.0/package/types/index.d.ts"
-import * as XLSX from 'https://cdn.sheetjs.com/xlsx-0.20.0/package/xlsx.mjs';
+import * as XLSX from 'https://cdn.sheetjs.com/xlsx-0.20.0/package/xlsx.full.min.js';
 
-function handleUpload() {
-	const fileInput = document.getElementById("teamsSpreadsheet");
-	const file = fileInput.files[0];
-	const reader = new FileReader();
+function handleUpload(type) {
+		const fileInput = document.getElementById(type + "Spreadsheet");
+		const file = fileInput.files[0];
+		const reader = new FileReader();
 
-	reader.onload = function(e) {
-		const contents = e.target.result;
-		const jsonData = convertToJSON(contents);
-		teams = jsonData;
-		createSchedule();
-	};
+		reader.onload = function(e) {
+				const contents = e.target.result;
+				const jsonData = XLSX.convertToJSON(contents);
+				// Do something with the JSON data
+		};
 
-	reader.readAsBinaryString(file);
+		reader.readAsBinaryString(file);
 }
-
 
 function convertToJSON(contents) {
-	const data = new Uint8Array(contents);
-	let workbook = XLSX.read(data, { type: 'array' });
-	let worksheet = workbook.Sheets[workbook.SheetNames[0]];
-	let jsonData = XLSX.utils.sheet_to_json(worksheet);
-	return jsonData;
+		// Your implementation to convert file contents to JSON
 }
-
-
-
-
-
 
 export { handleUpload, convertToJSON };
