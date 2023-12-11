@@ -1,28 +1,35 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>replit</title>
-	<link href="style.css" rel="stylesheet" type="text/css" />
+	<title>Ice Scheduler (Beta)</title>
+	<link href="style.css" rel="stylesheet"/>
+	<script type="module" src="Modules/WebScraping.js"></script>
 	<!-- use version 0.20.0 -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
 	<script lang="javascript" src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
 	<script type="module" src="Modules/Filehandler.js"></script>
 	<script type="module" src="Modules/Buttons.js"></script>
 	<script type="module" src="Modules/Scheduling.js"></script>
-	<script src="luxon.js"></script>
 </head>
+
 <body>
 	<h1>Ice Scheduler (Beta)</h1>
 	<br>
 	<div class="upload-container">
 		<p>Import Files</p>
 		<input type="file" id="teamsSpreadsheet" accept=".xlsx">
-		
+
 		<button id="uploadTeamsBtn">Upload Teams Spreadsheet</button>
 		<br>
 		<input type="file" id="gamesSpreadsheet" accept=".xlsx">
 		<button id="uploadGamesBtn">Upload Games Spreadsheet</button>
+		<input type="file" id="iceSlotInput"
+			accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel">
+		<button onclick="handleIceSlotUpload()">Upload Ice Slots</button>
 	</div>
 </body>
+
 </html>
