@@ -4,17 +4,33 @@ html {
 }
 
 body {
-	font-family: Arial, sans-serif;
-	background-color: #f4f4f4;
+	font-family: 'Roboto', sans-serif;
+	
 
 	font-size: 16px;
 	font-weight: 400;
 	line-height: 1.6;
 	padding: 20px;
 	margin: 0;
-	color: #333;
+	background-color: #94dba2;
+	color: #0B7189; /* Text color */
 
 
+}
+
+h1, h2, h3 {
+	color: #4F000B; /* Primary color for headings */
+	font-family: 'Montserrat', sans-serif;
+}
+p, h4{
+	margin-top: 5px; /* Keep the top margin */
+	margin-bottom: 5px; /* Keep the bottom margin */
+	margin-left: 0; /* Remove left margin */
+	margin-right: 0; /* Remove right margin */
+}
+.button {
+	background-color: #C19AB7; /* Primary color for buttons */
+	color: #fff; /* Text color for buttons */
 }
 
 /* Example: Adjust font size for smaller screens */
@@ -22,4 +38,73 @@ body {
 	body {
 		font-size: 14px;
 	}
+}
+
+/* Adjust as needed */
+.calendar-container {
+	background-color: #FFFFFF; /* Box background color */
+	padding: 20px; /* Padding around the calendar */
+	border-radius: 10px; /* Rounded corners for the box */
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Optional: Adding a shadow effect */
+	/* Other styles */
+}
+
+.upload-container {
+	/* Adjust styles as needed */
+	display: inline-block;
+	background-color: #f9f9f9;
+	padding: 10px;
+	margin: 10px;
+	border-radius: 5px;
+}
+
+.file-label {
+	/* Center the content and adjust padding */
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background-color: #f9f9f9;
+	padding: 7px 20px; /* 10px top and bottom, 20px left and right */
+	border-radius: 5px;
+	margin-bottom: 10px; /* Add margin to separate from the Confirm button */
+}
+
+
+.file-label i {
+	/* Adjust icon styles */
+	margin-right: 5px; /* Adding space between icon and text */
+}
+
+/* Hide the original file input */
+#iceSlotInput {
+	display: none;
+}
+
+#confirmButton {
+	/* Additional styles for the Confirm button */
+	padding: 8px 16px;
+	border: none;
+	border-radius: 5px;
+	background-color: #4CAF50; /* Change to your preferred color */
+	color: white;
+	cursor: pointer;
+}
+
+#confirmButton i {
+	/* Adjust icon styles */
+	margin-right: 5px; /* Adding space between icon and text */
+}
+
+/* Update or add this CSS to your existing stylesheet */
+
+.upload-container a {
+	/* Adjust link styles as needed */
+	color: #0B7189; /* Link color */
+	text-decoration: none; /* Remove underline */
+	margin-right: 10px; /* Add spacing between the link and file upload */
+}
+
+.upload-container a:hover {
+	/* Adjust link hover styles */
+	text-decoration: underline; /* Underline on hover */
 }

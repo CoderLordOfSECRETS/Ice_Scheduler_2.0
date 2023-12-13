@@ -202,7 +202,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 	const calendar = new FullCalendar.Calendar(calendarEl, {
 		initialView: "dayGridMonth",
-		
+
 		views: {
 			timeGridFourDay: {
 				type: 'timeGrid',
@@ -226,7 +226,11 @@ document.addEventListener("DOMContentLoaded", function() {
 
 	calendar = new FullCalendar.Calendar(calendarEl, {
 		initialView: "dayGridMonth",
-		// Other calendar configurations...
+		headerToolbar: {
+			left: 'prev,next,today',
+			center: 'title',
+			right: 'timeGridDay,timeGridWeek,dayGridMonth'
+		}
 	});
 
 	calendar.render(); // Make sure render() is called after initialization
@@ -299,6 +303,6 @@ function addEventsToCalendar(events) {
 }
 
 // Entry point: Add event listeners or trigger functions as needed
-document.getElementById("IceSlotUpload").addEventListener("click", handleIceSlotUpload);
+document.getElementById("confirmButton").addEventListener("click", handleIceSlotUpload);
 
 // Other event listeners or triggers as needed

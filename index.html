@@ -2,28 +2,39 @@
 <html>
 
 <head>
-  <meta charset="utf-8">
+	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ice Scheduler (Beta)</title>
-  <link href="styles.css" rel="stylesheet" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
-  <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
-  <!-- Load FullCalendar before your logic -->
+	<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500&family=Roboto&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+	<title>Ice Scheduler (Beta)</title>
+	<link href="styles.css" rel="stylesheet" />
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+	<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+	<!-- Load FullCalendar before your logic -->
 </head>
 
 <body>
-  <h1>Ice Scheduler (Beta)</h1>
-  <br>
-  <div class="upload-container">
-    <p>Import Files</p>
-    <input type="file" id="iceSlotInput" accept=".csv">
-    <button id="IceSlotUpload">Upload Ice Slots</button>
-  </div>
-  <br>
-  <div id="calendar"></div>
-  <script src="Apearance.js"></script>
-  <script src="Logic.js" type="module"></script>
-  <!-- Load your logic after FullCalendar and calendar setup -->
+	<h1>Ice Scheduler (Beta)</h1>
+	<br>
+	<div class="upload-container">
+		<h4>Upload Ice slots file (.csv only)</h4>
+		<a href="csv-format/index.html">How to make a good .csv file</a>
+		<label for="iceSlotInput" class="file-label">
+			<i class="fas fa-upload"></i> Choose File
+			<input type="file" id="iceSlotInput" accept=".csv">
+		</label>
+		<button id="confirmButton">
+			<i class="fas fa-check"></i> Confirm and start scheduling
+		</button>
+	</div>
+
+	<br>
+	<div class="calendar-container">
+		<div id="calendar"></div>
+	</div>
+	<script src="Apearance.js"></script>
+	<script src="Logic.js" type="module"></script>
+	<!-- Load your logic after FullCalendar and calendar setup -->
 </body>
 
 </html>
