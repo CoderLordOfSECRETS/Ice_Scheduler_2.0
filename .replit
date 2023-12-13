@@ -184,3 +184,12 @@ requiredFiles = [".replit", "replit.nix", ".config"]
 [deployment]
 publicDir = "/"
 deploymentTarget = "static"
+
+[rules]
+
+[rules.formatter]
+
+[rules.formatter.fileExtensions]
+
+[rules.formatter.fileExtensions.".js"]
+id = ".replit/languageServer:javascript"
