@@ -1,0 +1,85 @@
+/* Format.css */
+
+/* Body styles */
+body {
+		font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+		line-height: 1.6;
+		margin: 0;
+		padding: 0;
+		background-color: #f6f8fc;
+		color: #333;
+}
+
+/* Header styles */
+header {
+		background-color: #2c3e50;
+		color: #fff;
+		text-align: center;
+		padding: 20px 0;
+		height: 80px; /* Adjust the height as needed */
+}
+
+/* Heading styles */
+h1 {
+		color: #2c3e50;
+		margin: 0;
+		font-size: 24px; /* Adjust the font size as needed */
+}
+
+/* Footer styles */
+footer {
+		background-color: #2c3e50;
+		color: #fff;
+		text-align: center;
+		padding: 20px 0;
+}
+
+/* Heading and List styles (retain previous styles) */
+h2 {
+		color: #2c3e50;
+		margin-bottom: 10px;
+}
+
+ol,
+ul {
+		padding-left: 20px;
+		margin-bottom: 15px;
+}
+
+/* Link styles (retain previous styles) */
+a {
+		color: #3498db;
+		text-decoration: none;
+		transition: color 0.3s ease-in-out;
+}
+
+a:hover {
+		color: #2980b9;
+		text-decoration: underline;
+}
+
+/* Paragraph styles (retain previous styles) */
+p {
+		margin-bottom: 15px;
+		line-height: 1.5;
+}
+
+/* Footer paragraph styles (retain previous styles) */
+footer p {
+		margin-bottom: 5px;
+}
+
+/* Back link styles */
+.back-link {
+		display: inline-block;
+		color: #fff;
+		padding: 5px 10px;
+		background-color: #3498db;
+		border-radius: 5px;
+		transition: background-color 0.3s ease-in-out;
+		text-decoration: none; /* Ensure link formatting */
+}
+
+.back-link:hover {
+		background-color: #2980b9;
+}

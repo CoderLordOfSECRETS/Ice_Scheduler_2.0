@@ -5,12 +5,11 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500&family=Roboto&display=swap" rel="stylesheet">
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+	<script src="https://kit.fontawesome.com/3a828569ba.js" crossorigin="anonymous"></script>
 	<title>Ice Scheduler (Beta)</title>
 	<link href="styles.css" rel="stylesheet" />
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
 	<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
-	<!-- Load FullCalendar before your logic -->
 </head>
 
 <body>
@@ -18,7 +17,7 @@
 	<br>
 	<div class="upload-container">
 		<h4>Upload Ice slots file (.csv only)</h4>
-		<a href="csv-format/index.html">How to make a good .csv file</a>
+		<a href="csv-format/Format.html">How to make a good .csv file</a>
 		<label for="iceSlotInput" class="file-label">
 			<i class="fas fa-upload"></i> Choose File
 			<input type="file" id="iceSlotInput" accept=".csv">
@@ -34,7 +33,6 @@
 	</div>
 	<script src="Apearance.js"></script>
 	<script src="Logic.js" type="module"></script>
-	<!-- Load your logic after FullCalendar and calendar setup -->
 </body>
 
 </html>

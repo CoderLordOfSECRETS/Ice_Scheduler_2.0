@@ -86,31 +86,93 @@ function handleIceSlotUpload() {
 
 // Parse ice slot data
 function parseIceSlotData(content) {
-	const lines = content.split("\n").slice(1); // Remove header line
+	try {
+		const lines = content.split("\n").slice(1); // Remove header line
 
-	const iceSlots = lines.map((line) => {
-		const [arena, date, startTime, endTime] = line.split(",");
+		const iceSlots = lines.map((line, index) => {
+			const [arena, dateString, startTime, endTime] = line.split(",");
 
-		// Combine date and time strings into a single datetime using moment.js
-		const startDateTime = moment(
-			`${date.trim()} ${startTime.trim()}`,
-			"YYYY-MM-DD HH:mm",
-		);
-		const endDateTime = moment(
-			`${date.trim()} ${endTime.trim()}`,
-			"YYYY-MM-DD HH:mm",
-		);
+			if (!arena || !dateString || !startTime || !endTime) {
+				console.error(`Skipped invalid ice slot data at line ${index + 2}: Incomplete data.`);
+				return null;
+			}
 
-		return {
-			arena: arena.trim(),
-			startDateTime,
-			endDateTime,
-		};
-	});
+			const dateFormats = [
+				"YYYY-MM-DD", // Format 1
+				"MM/DD/YYYY", // Format 2
+				"YYYY-MM-DD HH:mm:ss",
+				"YYYY-MM-DD HH:mm",
+				"YYYY-MM-DDTHH:mm:ss",
+				"YYYY-MM-DDTHH:mm",
+				"YYYY/MM/DD HH:mm:ss",
+				"YYYY/MM/DD HH:mm",
+				"YYYY/MM/DDTHH:mm:ss",
+				"YYYY/MM/DDTHH:mm",
+				"MM/DD/YYYY HH:mm:ss",
+				"MM/DD/YYYY HH:mm",
+				"MM/DD/YYYYTHH:mm:ss",
+				"MM/DD/YYYYTHH:mm",
+				// Add more date formats here as needed
+			];
 
-	return iceSlots;
+			let startDateTime, endDateTime;
+			let formatIndex = 0;
+
+			while (!startDateTime && formatIndex < dateFormats.length) {
+				startDateTime = moment(
+					`${dateString.trim()} ${startTime.trim()}`,
+					`${dateFormats[formatIndex]} HH:mm`
+				);
+				endDateTime = moment(
+					`${dateString.trim()} ${endTime.trim()}`,
+					`${dateFormats[formatIndex]} HH:mm`
+				);
+				formatIndex++;
+			}
+
+			if (!startDateTime || !startDateTime.isValid() || !endDateTime || !endDateTime.isValid()) {
+				console.error(`Skipped invalid ice slot data at line ${index + 2}: Invalid date or time format.`);
+				return null;
+			}
+
+			if (endDateTime.isBefore(startDateTime)) {
+				console.error(`Skipped invalid ice slot data at line ${index + 2}: End time is before start time.`);
+				return null;
+			}
+
+			return {
+				arena: arena.trim(),
+				startDateTime,
+				endDateTime,
+			};
+		}).filter(slot => slot !== null); // Remove null entries
+
+		return iceSlots;
+	} catch (error) {
+		console.error("Error parsing ice slots:", error.message);
+		return [];
+	}
 }
 
+function calculateIceValue(slot) {
+	const slotDuration = slot.endDateTime.diff(slot.startDateTime, 'hours', true);
+
+	if (slotDuration >= 1.5) {
+		// Full ice, 90 minutes
+		return 1.5;
+	} else if (slotDuration >= 1) {
+		// Full ice, 60 minutes
+		return 1;
+	} else if (slotDuration >= 0.75) {
+		// Half ice, 90 minutes
+		return 0.75;
+	} else {
+		// Half ice, 60 minutes or other cases
+		return 0.5;
+	}
+}
+
+// Schedule practices after ice slots and game schedule are available
 // Schedule practices after ice slots and game schedule are available
 async function schedulePractices() {
 	if (iceSlots.length === 0) {
@@ -124,73 +186,88 @@ async function schedulePractices() {
 
 	const scheduledPracticesBySlot = {};
 
+	// Initialize available slots with their respective ice values
 	for (const slot of availableIceSlots) {
-		scheduledPracticesBySlot[slot.startDateTime] = []; // Initialize slots to store practices
+		scheduledPracticesBySlot[slot.startDateTime] = {
+			iceValue: calculateIceValue(slot),
+			practices: [],
+		};
 	}
 
 	const teamsScheduled = {}; // Track teams already assigned to ice slots
 
+	// Sort teams by the number of practices scheduled
+	const teamsByPracticeCount = {};
 	parsedGameSchedule.forEach((game) => {
-		const homeTeam = game.homeTeam;
-		const awayTeam = game.awayTeam;
+		const homeTeam = game.homeTeam.includes("METCALFE JETS") ? game.homeTeam.split("METCALFE JETS")[1].trim() : null;
+		const awayTeam = game.awayTeam.includes("METCALFE JETS") ? game.awayTeam.split("METCALFE JETS")[1].trim() : null;
+
+		if (homeTeam && !teamsByPracticeCount[homeTeam]) {
+			teamsByPracticeCount[homeTeam] = 0;
+		}
+		if (awayTeam && !teamsByPracticeCount[awayTeam]) {
+			teamsByPracticeCount[awayTeam] = 0;
+		}
+	});
+
+	// Iterate through games and assign practices based on ice value and team practice count
+	parsedGameSchedule.forEach((game) => {
+		const homeTeam = game.homeTeam.includes("METCALFE JETS") ? game.homeTeam.split("METCALFE JETS")[1].trim() : null;
+		const awayTeam = game.awayTeam.includes("METCALFE JETS") ? game.awayTeam.split("METCALFE JETS")[1].trim() : null;
 
 		let selectedTeam = null;
 
-		if (homeTeam.includes("METCALFE JETS")) {
-			const team = homeTeam.split("METCALFE JETS")[1].trim();
-			if (!teamsScheduled[team]) {
-				selectedTeam = team;
+		if (homeTeam && !teamsScheduled[homeTeam]) {
+			if (!selectedTeam || teamsByPracticeCount[selectedTeam] > teamsByPracticeCount[homeTeam]) {
+				selectedTeam = homeTeam;
 			}
 		}
 
-		if (!selectedTeam && awayTeam.includes("METCALFE JETS")) {
-			const team = awayTeam.split("METCALFE JETS")[1].trim();
-			if (!teamsScheduled[team]) {
-				selectedTeam = team;
+		if (awayTeam && !teamsScheduled[awayTeam]) {
+			if (!selectedTeam || teamsByPracticeCount[selectedTeam] > teamsByPracticeCount[awayTeam]) {
+				selectedTeam = awayTeam;
 			}
 		}
 
 		if (selectedTeam) {
-			const teamsPracticesCount = {};
-			for (const team in teamsScheduled) {
-				teamsPracticesCount[team] = scheduledPracticesBySlot.length;
-			}
-
-			const sortedTeams = Object.keys(teamsPracticesCount).sort(
-				(teamA, teamB) => teamsPracticesCount[teamA] - teamsPracticesCount[teamB]
-			);
-
 			const selectedSlot = availableIceSlots.find((slot) => {
-				const gameDateTime = moment(
-					`${game.date} ${game.time}`,
-					"YYYY-MM-DD HH:mm",
-				);
-				return (
-					gameDateTime.isSameOrAfter(slot.startDateTime) &&
-					gameDateTime.isSameOrBefore(slot.endDateTime) &&
-					scheduledPracticesBySlot[slot.startDateTime].length === 0
-				);
+				const { remainingIce, practices } = scheduledPracticesBySlot[slot.startDateTime];
+
+				const gameDateTime = moment(`${game.date} ${game.time}`, "YYYY-MM-DD HH:mm");
+
+				const isSlotAvailable = practices.every(practice => {
+					return (
+						gameDateTime.isSameOrAfter(practice.startDateTime) &&
+						gameDateTime.isSameOrBefore(practice.endDateTime)
+					);
+				});
+
+				const slotDuration = slot.endDateTime.diff(slot.startDateTime, 'hours', true);
+				const practiceDuration = slotDuration >= 1.5 ? 1.5 : 1;
+
+				return remainingIce >= practiceDuration && isSlotAvailable;
 			});
 
 			if (selectedSlot) {
-				scheduledPracticesBySlot[selectedSlot.startDateTime].push({
+				const { iceValue } = scheduledPracticesBySlot[selectedSlot.startDateTime];
+				const slotDuration = selectedSlot.endDateTime.diff(selectedSlot.startDateTime, 'hours', true);
+				const practiceDuration = slotDuration >= 1.5 ? 1.5 : 1;
+				const iceUsed = practiceDuration === 1.5 ? 2 : 1;
+
+				scheduledPracticesBySlot[selectedSlot.startDateTime].practices.push({
 					team: `METCALFE JETS ${selectedTeam}`,
 					startDateTime: selectedSlot.startDateTime.clone(),
-					endDateTime: selectedSlot.startDateTime.clone().add(1, "hours"),
+					endDateTime: selectedSlot.startDateTime.clone().add(practiceDuration, 'hours'),
 				});
-				teamsScheduled[selectedTeam] = true; // Mark the team as scheduled
+
+				scheduledPracticesBySlot[selectedSlot.startDateTime].iceValue -= iceUsed;
+				teamsScheduled[selectedTeam] = true;
+				teamsByPracticeCount[selectedTeam]++;
 			}
 		}
 	});
-
-	const scheduledPractices = {};
-	for (const slot in scheduledPracticesBySlot) {
-		scheduledPractices[slot] = scheduledPracticesBySlot[slot];
-	}
-
-	console.log("Scheduled Practices:", scheduledPractices);
-	convertToCalendarEvents(scheduledPractices);
 }
+
 
 
 document.addEventListener("DOMContentLoaded", function() {
@@ -214,6 +291,31 @@ document.addEventListener("DOMContentLoaded", function() {
 	calendar.render();
 });
 
+function displayEventDetails(details) {
+	const popupContainer = document.createElement('div');
+	popupContainer.classList.add('popup-container');
+
+	const popupContent = document.createElement('div');
+	popupContent.classList.add('popup-content');
+
+	const content = document.createElement('p');
+	content.textContent = details;
+
+	const closeButton = document.createElement('span');
+	closeButton.classList.add('close-button');
+	closeButton.innerHTML = '&times;';
+	closeButton.onclick = function() {
+		popupContainer.remove();
+	};
+
+	popupContent.appendChild(closeButton);
+	popupContent.appendChild(content);
+	popupContainer.appendChild(popupContent);
+
+	document.body.appendChild(popupContainer);
+}
+
+
 let isCalendarReady = false;
 
 let calendar
@@ -230,6 +332,17 @@ document.addEventListener("DOMContentLoaded", function() {
 			left: 'prev,next,today',
 			center: 'title',
 			right: 'timeGridDay,timeGridWeek,dayGridMonth'
+		},
+		// ... (other configurations)
+
+		// Add the eventClick callback here
+		eventClick: function(info) {
+			const eventDetails = `
+								Event Title: ${info.event.title}\n
+								Start: ${info.event.start.toLocaleString()}\n
+								End: ${info.event.end.toLocaleString()}
+						`;
+			displayEventDetails(eventDetails); // Function to display event details
 		}
 	});
 
@@ -247,14 +360,19 @@ async function convertToCalendarEvents(practices) {
 	// Add game events
 	const parsedGameSchedule = await fetchAndProcessGameSchedule();
 	parsedGameSchedule.forEach((game) => {
-		events.push({
-			title: `${game.homeTeam} vs ${game.awayTeam}`,
-			start: moment(`${game.date} ${game.time}`, "YYYY-MM-DD HH:mm").toISOString(),
-			end: moment(`${game.date} ${game.time}`, "YYYY-MM-DD HH:mm").add(1, 'hours').toISOString(), // Assuming game duration of 1 hours
-			backgroundColor: 'blue', // Example color for game events
-		});
+		if (
+			game.homeTeam.includes("METCALFE JETS") ||
+			game.awayTeam.includes("METCALFE JETS")
+		) {
+			events.push({
+				title: `${game.homeTeam} vs ${game.awayTeam}`,
+				start: moment(`${game.date} ${game.time}`, "YYYY-MM-DD HH:mm").toISOString(),
+				end: moment(`${game.date} ${game.time}`, "YYYY-MM-DD HH:mm").add(1, 'hours').toISOString(), // Assuming game duration of 1 hour
+				backgroundColor: 'blue', // Example color for game events
+			});
+		}
 	});
-	console.log("Games done")
+
 	// Add practice events
 	for (const team in practices) {
 		practices[team].forEach((practice) => {
