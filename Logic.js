@@ -98,8 +98,8 @@ function parseIceSlotData(content) {
 			}
 
 			const dateFormats = [
-				"YYYY-MM-DD", // Format 1
-				"MM/DD/YYYY", // Format 2
+				"YYYY-MM-DD",
+				"MM/DD/YYYY",
 				"YYYY-MM-DD HH:mm:ss",
 				"YYYY-MM-DD HH:mm",
 				"YYYY-MM-DDTHH:mm:ss",
