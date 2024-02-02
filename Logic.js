@@ -51,7 +51,7 @@ async function fetchAndProcessGameSchedule() {
 		}
 
 		const parsedGameSchedule = lines.map(parseGameScheduleLine).filter((game) => game !== null); // Filter out null (undefined or incomplete data)
-
+		console.log("Game schedule complete")
 		return parsedGameSchedule;
 	} catch (error) {
 		console.error("There was a problem fetching the schedule:", error);
@@ -163,16 +163,12 @@ function calculateIceValue(slot) {
 	} else if (slotDuration >= 1) {
 		// Full ice, 60 minutes
 		return 1;
-	} else if (slotDuration >= 0.75) {
-		// Half ice, 90 minutes
-		return 0.75;
 	} else {
-		// Half ice, 60 minutes or other cases
-		return 0.5;
+		console.error("IceSlotValue: Invalid slot duration:", "slotDuration");
 	}
 }
 
-// Schedule practices after ice slots and game schedule are available
+
 // Schedule practices after ice slots and game schedule are available
 async function schedulePractices() {
 	if (iceSlots.length === 0) {
@@ -184,6 +180,8 @@ async function schedulePractices() {
 
 	const availableIceSlots = iceSlots.slice(); // Create a copy of iceSlots array
 
+	const teamsIceValues = {}; // Track ice values for each team
+
 	const scheduledPracticesBySlot = {};
 
 	// Initialize available slots with their respective ice values
@@ -194,78 +192,70 @@ async function schedulePractices() {
 		};
 	}
 
-	const teamsScheduled = {}; // Track teams already assigned to ice slots
-
-	// Sort teams by the number of practices scheduled
-	const teamsByPracticeCount = {};
+	// Initialize ice values for each team
 	parsedGameSchedule.forEach((game) => {
 		const homeTeam = game.homeTeam.includes("METCALFE JETS") ? game.homeTeam.split("METCALFE JETS")[1].trim() : null;
 		const awayTeam = game.awayTeam.includes("METCALFE JETS") ? game.awayTeam.split("METCALFE JETS")[1].trim() : null;
 
-		if (homeTeam && !teamsByPracticeCount[homeTeam]) {
-			teamsByPracticeCount[homeTeam] = 0;
+		if (homeTeam && !teamsIceValues[homeTeam]) {
+			teamsIceValues[homeTeam] = 0;
 		}
-		if (awayTeam && !teamsByPracticeCount[awayTeam]) {
-			teamsByPracticeCount[awayTeam] = 0;
+		if (awayTeam && !teamsIceValues[awayTeam]) {
+			teamsIceValues[awayTeam] = 0;
 		}
 	});
 
-	// Iterate through games and assign practices based on ice value and team practice count
-	parsedGameSchedule.forEach((game) => {
-		const homeTeam = game.homeTeam.includes("METCALFE JETS") ? game.homeTeam.split("METCALFE JETS")[1].trim() : null;
-		const awayTeam = game.awayTeam.includes("METCALFE JETS") ? game.awayTeam.split("METCALFE JETS")[1].trim() : null;
+	// Sort teams by the lowest ice value
+	const sortedTeams = Object.keys(teamsIceValues).sort((a, b) => teamsIceValues[a] - teamsIceValues[b]);
 
-		let selectedTeam = null;
+	// Iterate through teams and assign practices based on ice value and available slots
+	for (const team of sortedTeams) {
+		const teamIceValue = teamsIceValues[team];
+		const availableSlots = availableIceSlots.filter(slot => scheduledPracticesBySlot[slot.startDateTime].iceValue > 0);
 
-		if (homeTeam && !teamsScheduled[homeTeam]) {
-			if (!selectedTeam || teamsByPracticeCount[selectedTeam] > teamsByPracticeCount[homeTeam]) {
-				selectedTeam = homeTeam;
-			}
-		}
+		// Find the first available slot for the team
+		const selectedSlot = availableSlots.find((slot) => {
+			const { remainingIce, practices } = scheduledPracticesBySlot[slot.startDateTime];
 
-		if (awayTeam && !teamsScheduled[awayTeam]) {
-			if (!selectedTeam || teamsByPracticeCount[selectedTeam] > teamsByPracticeCount[awayTeam]) {
-				selectedTeam = awayTeam;
-			}
-		}
-
-		if (selectedTeam) {
-			const selectedSlot = availableIceSlots.find((slot) => {
-				const { remainingIce, practices } = scheduledPracticesBySlot[slot.startDateTime];
-
-				const gameDateTime = moment(`${game.date} ${game.time}`, "YYYY-MM-DD HH:mm");
-
-				const isSlotAvailable = practices.every(practice => {
-					return (
-						gameDateTime.isSameOrAfter(practice.startDateTime) &&
-						gameDateTime.isSameOrBefore(practice.endDateTime)
-					);
-				});
-
-				const slotDuration = slot.endDateTime.diff(slot.startDateTime, 'hours', true);
-				const practiceDuration = slotDuration >= 1.5 ? 1.5 : 1;
-
-				return remainingIce >= practiceDuration && isSlotAvailable;
+			// Check if the slot is available for the team
+			const isSlotAvailable = practices.every(practice => {
+				return (
+					slot.startDateTime.isSameOrAfter(practice.endDateTime) ||
+					slot.endDateTime.isSameOrBefore(practice.startDateTime)
+				);
 			});
 
-			if (selectedSlot) {
-				const { iceValue } = scheduledPracticesBySlot[selectedSlot.startDateTime];
-				const slotDuration = selectedSlot.endDateTime.diff(selectedSlot.startDateTime, 'hours', true);
-				const practiceDuration = slotDuration >= 1.5 ? 1.5 : 1;
-				const iceUsed = practiceDuration === 1.5 ? 2 : 1;
+			const slotDuration = slot.endDateTime.diff(slot.startDateTime, 'hours', true);
+			const practiceDuration = slotDuration >= 1.5 ? 1.5 : 1;
 
-				scheduledPracticesBySlot[selectedSlot.startDateTime].practices.push({
-					team: `METCALFE JETS ${selectedTeam}`,
-					startDateTime: selectedSlot.startDateTime.clone(),
-					endDateTime: selectedSlot.startDateTime.clone().add(practiceDuration, 'hours'),
-				});
+			return remainingIce >= practiceDuration && isSlotAvailable;
+		});
 
-				scheduledPracticesBySlot[selectedSlot.startDateTime].iceValue -= iceUsed;
-				teamsScheduled[selectedTeam] = true;
-				teamsByPracticeCount[selectedTeam]++;
-			}
+		if (selectedSlot) {
+			const { iceValue } = scheduledPracticesBySlot[selectedSlot.startDateTime];
+			const slotDuration = selectedSlot.endDateTime.diff(selectedSlot.startDateTime, 'hours', true);
+			const practiceDuration = slotDuration >= 1.5 ? 1.5 : 1;
+			const iceUsed = practiceDuration === 1.5 ? 2 : 1;
+
+			// Schedule the practice
+			scheduledPracticesBySlot[selectedSlot.startDateTime].practices.push({
+				team: `METCALFE JETS ${team}`,
+				startDateTime: selectedSlot.startDateTime.clone(),
+				endDateTime: selectedSlot.startDateTime.clone().add(practiceDuration, 'hours'),
+			});
+
+			// Update ice values
+			scheduledPracticesBySlot[selectedSlot.startDateTime].iceValue -= iceUsed;
+			teamsIceValues[team] += iceUsed;
+
+			// Set the ice value of the selected slot to 0
+			scheduledPracticesBySlot[selectedSlot.startDateTime].iceValue = 0;
 		}
-	});
+	}
+
+	// After scheduling practices, call convertToCalendarEvents
+	const scheduledPracticesArray = Object.values(scheduledPracticesBySlot).flatMap(entry => entry.practices);
+	await convertToCalendarEvents(scheduledPracticesArray);
 }
 
 
@@ -374,16 +364,15 @@ async function convertToCalendarEvents(practices) {
 	});
 
 	// Add practice events
-	for (const team in practices) {
-		practices[team].forEach((practice) => {
-			events.push({
-				title: `${practice.team} Practice`,
-				start: practice.startDateTime.toISOString(),
-				end: practice.endDateTime.toISOString(),
-				backgroundColor: 'green', // Example color for practice events
-			});
+	practices.forEach((practice) => {
+		events.push({
+			title: `${practice.team} Practice`,
+			start: practice.startDateTime.toISOString(),
+			end: practice.endDateTime.toISOString(),
+			backgroundColor: 'green',
 		});
-	}
+	});
+
 
 	addEventsToCalendar(events);
 }
