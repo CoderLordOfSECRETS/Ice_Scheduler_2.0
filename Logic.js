@@ -255,6 +255,7 @@ async function schedulePractices() {
 
 	// After scheduling practices, call convertToCalendarEvents
 	const scheduledPracticesArray = Object.values(scheduledPracticesBySlot).flatMap(entry => entry.practices);
+	console.log("Scheduled Practices:", scheduledPracticesBySlot);
 	await convertToCalendarEvents(scheduledPracticesArray);
 }
 
@@ -372,7 +373,6 @@ async function convertToCalendarEvents(practices) {
 			backgroundColor: 'green',
 		});
 	});
-
 
 	addEventsToCalendar(events);
 }
