@@ -122,8 +122,6 @@ h4 {
 .manual-entry-container {
 	flex-grow: 0;
 	/* Prevent the container from growing */
-	margin-right: 20px;
-	/* Add margin between containers */
 }
 
 /* Media query for smaller screens */
