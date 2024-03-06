@@ -168,11 +168,63 @@ function parseIceSlotData(content) {
       })
       .filter((slot) => slot !== null); // Remove null entries
 
-    return iceSlots;
+    // Call iceSlotSplitter function to split long ice slots
+    const processedIceSlots = iceSlotSplitter(iceSlots);
+
+    return processedIceSlots;
   } catch (error) {
     console.error("Error parsing ice slots:", error.message);
     return [];
   }
+}
+
+function iceSlotSplitter(iceSlots) {
+  const newIceSlots = [];
+
+  iceSlots.forEach((slot) => {
+    const slotDurationHours = slot.endDateTime.diff(
+      slot.startDateTime,
+      "hours",
+      true,
+    );
+
+    if (slotDurationHours === 2) {
+      // Split the 2-hour slot into two 1-hour slots
+      const midpoint = slot.startDateTime.clone().add(1, "hour");
+      newIceSlots.push({
+        arena: slot.arena,
+        startDateTime: slot.startDateTime.clone(),
+        endDateTime: midpoint.clone(),
+      });
+      newIceSlots.push({
+        arena: slot.arena,
+        startDateTime: midpoint.clone(),
+        endDateTime: slot.endDateTime.clone(),
+      });
+    } else if (slotDurationHours > 1.5) {
+      let startDateTime = slot.startDateTime.clone();
+      let remainingDuration = slotDurationHours;
+
+      while (remainingDuration >= 1) {
+        let durationToAdd = Math.min(remainingDuration, 1.5); // Take either 1 hour or 1.5 hours
+        let endDateTime = startDateTime.clone().add(durationToAdd, "hour");
+
+        newIceSlots.push({
+          arena: slot.arena,
+          startDateTime: startDateTime.clone(),
+          endDateTime: endDateTime.clone(),
+        });
+
+        startDateTime.add(durationToAdd, "hour");
+        remainingDuration -= durationToAdd;
+      }
+    } else {
+      // Push the original ice slot if its duration is less than or equal to 1.5 hours
+      newIceSlots.push(slot);
+    }
+  });
+
+  return newIceSlots;
 }
 
 function calculateIceValue(slot) {
@@ -210,7 +262,6 @@ function getMetcalfeTeams(parsedGameSchedule) {
 }
 
 // Schedule practices after ice slots and game schedule are available
-// Schedule practices after ice slots and game schedule are available
 async function schedulePractices() {
   if (iceSlots.length === 0) {
     console.error("No ice slots available.");
@@ -235,8 +286,10 @@ async function schedulePractices() {
   for (const slot of availableIceSlots) {
     scheduledPracticesBySlot[slot.startDateTime] = {
       slot,
-      iceValue: calculateIceValue(slot, false, false), // Initially assuming no shared ice and no extended duration
+      iceValue: calculateIceValue(slot), // Initially assuming no shared ice
       practices: [],
+      teamsScheduled: 0, // Track the number of teams scheduled on this slot
+      halfIce: false, // Track if the slot has half ice
     };
   }
 
@@ -257,6 +310,7 @@ async function schedulePractices() {
       .filter(
         (slot) =>
           slot.iceValue > 0 &&
+          slot.teamsScheduled < 2 && // Consider slots with less than 2 teams scheduled
           slot.practices.every((practice) => practice.team !== team),
       ) // Filter out slots already scheduled for this team
       .sort((a, b) => b.iceValue - a.iceValue); // Sort in descending order of ice value
@@ -298,9 +352,13 @@ async function schedulePractices() {
             .add(practiceDuration, "hours"),
         };
 
-        // Update scheduled practices and teams' ice values
+        // Update scheduled practices, teams' ice values, and the number of teams scheduled on this slot
         scheduledPracticesBySlot[slot.startDateTime].practices.push(practice);
         teamsIceValues[team] += practiceDuration;
+        scheduledPracticesBySlot[slot.startDateTime].teamsScheduled++;
+        if (scheduledPracticesBySlot[slot.startDateTime].teamsScheduled === 2) {
+          slot.halfIce = true;
+        }
 
         console.log(
           `Scheduled practice for ${practice.team} on ${practice.startDateTime} to ${practice.endDateTime}`,
@@ -311,7 +369,7 @@ async function schedulePractices() {
     }
 
     if (!scheduled) {
-      console.error(`No suitable ice slot found for ${team}.`);
+      console.warn(`No suitable ice slot found for ${team}.`);
     }
   }
 
@@ -410,8 +468,11 @@ async function convertToCalendarEvents(practices) {
 
   // Add practice events
   practices.forEach((practice) => {
+    // Modify the event title based on whether it's half-ice or full-ice
+    const title =
+      practice.team + (practice.halfIce ? " (Half Ice)" : " (Full Ice)");
     events.push({
-      title: `${practice.team} Practice`,
+      title: title,
       start: practice.startDateTime.toISOString(),
       end: practice.endDateTime.toISOString(),
       backgroundColor: "green",
