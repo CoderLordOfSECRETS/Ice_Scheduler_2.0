@@ -1,4 +1,4 @@
-// Define a function that fetches and processes the game schedule data
+
 let scheduledPractices;
 let blackBlocks = [];
 
