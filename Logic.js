@@ -1,4 +1,4 @@
-
+let metcalfeTeams = [];
 let scheduledPractices;
 let blackBlocks = [];
 
@@ -64,12 +64,12 @@ async function fetchAndProcessGameSchedule(link) {
 	}
 }
 
-async function UnifySchedules(){
+async function UnifySchedules() {
 	let parsedGameSchedule = await fetchAndProcessGameSchedule("https://ttmwebservices.ca/schedules/index.php?pgid=dnl-11-010&dtype=CSV&AID=HEO&JID=district9&pcode=15679761017023700001&ddtype=&stype=2&atype=");
 	const PlayoffSchedule = await fetchAndProcessGameSchedule("https://ttmwebservices.ca/schedules/index.php?pgid=dnl-11-010&dtype=CSV&AID=HEO&JID=district9&pcode=15838414804934000001&ddtype=&stype=2&atype=");
-		if (PlayoffSchedule){
-			parsedGameSchedule = parsedGameSchedule.concat(PlayoffSchedule);
-		}
+	if (PlayoffSchedule) {
+		parsedGameSchedule = parsedGameSchedule.concat(PlayoffSchedule);
+	}
 	return parsedGameSchedule
 }
 
@@ -248,7 +248,6 @@ function calculateIceValue(slot) {
 }
 
 function getMetcalfeTeams(parsedGameSchedule) {
-	const metcalfeTeams = [];
 
 	parsedGameSchedule.forEach((game) => {
 		const homeTeam = game.homeTeam.includes("METCALFE JETS")
@@ -266,7 +265,6 @@ function getMetcalfeTeams(parsedGameSchedule) {
 		}
 	});
 
-	return metcalfeTeams;
 }
 
 // Schedule practices after ice slots and game schedule are available
@@ -274,7 +272,7 @@ async function schedulePractices() {
 	// Fetch and process the game schedule
 	let parsedGameSchedule = await UnifySchedules()
 	// Extract Metcalfe Jets teams from the game schedule
-	const metcalfeTeams = getMetcalfeTeams(parsedGameSchedule);
+	getMetcalfeTeams(parsedGameSchedule);
 
 	// Sort available ice slots by start time
 	let availableIceSlots = iceSlots.slice().sort((a, b) => a.startDateTime - b.startDateTime);
@@ -524,11 +522,32 @@ function handleBlackBlockSubmission(event) {
 	blackBlocks.push(blackBlockData);
 }
 
+function handleTeamSubmission(event) {
+	event.preventDefault(); // Prevent the default form submission behavior
+
+	const teamNameInput = document.getElementById("teamName").value.toUpperCase(); // Get the team name and convert to uppercase
+
+	// Check if the team name is not empty
+	if (teamNameInput.trim() !== "") {
+		// Add the team to the list of Metcalfe teams if not already present
+		if (!metcalfeTeams.includes(teamNameInput)) {
+			metcalfeTeams.push(teamNameInput); // Add the team to the Metcalfe teams array
+			console.log("Added team:", teamNameInput);
+		} else {
+			console.warn("Team already exists:", teamNameInput);
+		}
+
+		// Clear the team name input field
+		document.getElementById("teamName").value = "";
+	} else {
+		console.error("Team name cannot be empty.");
+	}
+}
+
 
 // Entry point: Add event listeners or trigger functions as needed
 document
 	.getElementById("confirmButton")
 	.addEventListener("click", handleIceSlotUpload);
-
-// Other event listeners or triggers as needed
+document.getElementById("submitTeam").addEventListener("click", handleTeamSubmission);
 document.getElementById("submitBlackBlock").addEventListener("click", handleBlackBlockSubmission);
