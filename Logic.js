@@ -272,11 +272,7 @@ function getMetcalfeTeams(parsedGameSchedule) {
 // Schedule practices after ice slots and game schedule are available
 async function schedulePractices() {
 	// Fetch and process the game schedule
-	let parsedGameSchedule = await fetchAndProcessGameSchedule("https://ttmwebservices.ca/schedules/index.php?pgid=dnl-11-010&dtype=CSV&AID=HEO&JID=district9&pcode=15679761017023700001&ddtype=&stype=2&atype=");
-const PlayoffSchedule = await fetchAndProcessGameSchedule("https://ttmwebservices.ca/schedules/index.php?pgid=dnl-11-010&dtype=CSV&AID=HEO&JID=district9&pcode=15838414804934000001&ddtype=&stype=2&atype=");
-	if (PlayoffSchedule){
-		parsedGameSchedule = parsedGameSchedule.concat(PlayoffSchedule);
-	}
+	let parsedGameSchedule = await UnifySchedules()
 	// Extract Metcalfe Jets teams from the game schedule
 	const metcalfeTeams = getMetcalfeTeams(parsedGameSchedule);
 
