@@ -2,10 +2,10 @@
 let scheduledPractices;
 let blackBlocks = [];
 
-async function fetchAndProcessGameSchedule() {
+async function fetchAndProcessGameSchedule(link) {
 	try {
 		const response = await fetch(
-			"https://ttmwebservices.ca/schedules/index.php?pgid=dnl-11-010&dtype=CSV&AID=HEO&JID=district9&pcode=15679761017023700001&ddtype=&stype=2&atype=",
+			link,
 		);
 		if (!response.ok) {
 			throw new Error("Network response was not ok.");
@@ -62,6 +62,15 @@ async function fetchAndProcessGameSchedule() {
 		alert("There was a problem fetching the schedule. Please try again."); // Inform the user about the error
 		return []; // Return empty array or handle the error case
 	}
+}
+
+async function UnifySchedules(){
+	let parsedGameSchedule = await fetchAndProcessGameSchedule("https://ttmwebservices.ca/schedules/index.php?pgid=dnl-11-010&dtype=CSV&AID=HEO&JID=district9&pcode=15679761017023700001&ddtype=&stype=2&atype=");
+	const PlayoffSchedule = await fetchAndProcessGameSchedule("https://ttmwebservices.ca/schedules/index.php?pgid=dnl-11-010&dtype=CSV&AID=HEO&JID=district9&pcode=15838414804934000001&ddtype=&stype=2&atype=");
+		if (PlayoffSchedule){
+			parsedGameSchedule = parsedGameSchedule.concat(PlayoffSchedule);
+		}
+	return parsedGameSchedule
 }
 
 // Handle ice slot upload and process content
@@ -263,8 +272,11 @@ function getMetcalfeTeams(parsedGameSchedule) {
 // Schedule practices after ice slots and game schedule are available
 async function schedulePractices() {
 	// Fetch and process the game schedule
-	const parsedGameSchedule = await fetchAndProcessGameSchedule();
-
+	let parsedGameSchedule = await fetchAndProcessGameSchedule("https://ttmwebservices.ca/schedules/index.php?pgid=dnl-11-010&dtype=CSV&AID=HEO&JID=district9&pcode=15679761017023700001&ddtype=&stype=2&atype=");
+const PlayoffSchedule = await fetchAndProcessGameSchedule("https://ttmwebservices.ca/schedules/index.php?pgid=dnl-11-010&dtype=CSV&AID=HEO&JID=district9&pcode=15838414804934000001&ddtype=&stype=2&atype=");
+	if (PlayoffSchedule){
+		parsedGameSchedule = parsedGameSchedule.concat(PlayoffSchedule);
+	}
 	// Extract Metcalfe Jets teams from the game schedule
 	const metcalfeTeams = getMetcalfeTeams(parsedGameSchedule);
 
@@ -429,7 +441,7 @@ async function convertToCalendarEvents(practices) {
 	const events = [];
 
 	// Add game events
-	const parsedGameSchedule = await fetchAndProcessGameSchedule();
+	const parsedGameSchedule = await UnifySchedules();
 	parsedGameSchedule.forEach((game) => {
 		if (
 			game.homeTeam.includes("METCALFE JETS") ||
