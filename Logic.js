@@ -371,6 +371,11 @@ async function schedulePractices() {
 
 
 function displayEventDetails(details) {
+	// Create a transparent overlay
+	const overlay = document.createElement("div");
+	overlay.classList.add("popup-overlay");
+	document.body.appendChild(overlay);
+
 	const popupContainer = document.createElement("div");
 	popupContainer.classList.add("popup-container");
 
@@ -385,14 +390,29 @@ function displayEventDetails(details) {
 	closeButton.innerHTML = "&times;";
 	closeButton.onclick = function() {
 		popupContainer.remove();
+		overlay.remove(); // Remove the overlay when the popup is closed
 	};
 
 	popupContent.appendChild(closeButton);
 	popupContent.appendChild(content);
 	popupContainer.appendChild(popupContent);
 
+	// Apply solid white background to the popup container
+	popupContainer.style.backgroundColor = "white";
+
+	// Add styles to position the popup over the calendar
+	popupContainer.style.position = "fixed";
+	popupContainer.style.top = "50%";
+	popupContainer.style.left = "50%";
+	popupContainer.style.transform = "translate(-50%, -50%)";
+	popupContainer.style.padding = "20px";
+	popupContainer.style.borderRadius = "8px";
+	popupContainer.style.boxShadow = "0 0 10px rgba(0, 0, 0, 0.2)";
+	popupContainer.style.zIndex = "1000"; // Ensure the popup appears in front of other content
+
 	document.body.appendChild(popupContainer);
 }
+
 
 let isCalendarReady = false;
 
