@@ -1,39 +1,79 @@
 <!DOCTYPE html>
 
 <html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500&family=Roboto&display=swap"
+      rel="stylesheet"
+    />
+    <script
+      src="https://kit.fontawesome.com/3a828569ba.js"
+      crossorigin="anonymous"
+    ></script>
+    <title>Ice Scheduler (Beta)</title>
+    <link href="styles.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+  </head>
 
-<head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500&family=Roboto&display=swap" rel="stylesheet">
-	<script src="https://kit.fontawesome.com/3a828569ba.js" crossorigin="anonymous"></script>
-	<title>Ice Scheduler (Beta)</title>
-	<link href="styles.css" rel="stylesheet" />
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
-	<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
-</head>
+  <body>
+    <h1>Ice Scheduler (Beta)</h1>
+    <br />
+    <div class="upload-container">
+      <h4>Upload Ice slots file (.csv only)</h4>
+      <a href="csv-format/Format.html">How to make a good .csv file</a>
+      <label for="iceSlotInput" class="file-label">
+        <i class="fas fa-upload"></i> Choose File
+        <input type="file" id="iceSlotInput" accept=".csv" />
+      </label>
+      <button id="confirmButton">
+        <i class="fas fa-check"></i> Confirm and start scheduling
+      </button>
+    </div>
 
-<body>
-	<h1>Ice Scheduler (Beta)</h1>
-	<br>
-	<div class="upload-container">
-		<h4>Upload Ice slots file (.csv only)</h4>
-		<a href="csv-format/Format.html">How to make a good .csv file</a>
-		<label for="iceSlotInput" class="file-label">
-			<i class="fas fa-upload"></i> Choose File
-			<input type="file" id="iceSlotInput" accept=".csv">
-		</label>
-		<button id="confirmButton">
-			<i class="fas fa-check"></i> Confirm and start scheduling
-		</button>
-	</div>
-
-	<br>
-	<div class="calendar-container">
-		<div id="calendar"></div>
-	</div>
-	<script src="Apearance.js"></script>
-	<script src="Logic.js" type="module"></script>
-</body>
-
+    <br />
+    <div class="main-container">
+      <div class="calendar-container">
+        <div id="calendar"></div>
+      </div>
+      <div class="manual-entry-container">
+        <div id="manualEntryForm" class="manual-entry-form">
+          <h3>Manual Entry</h3>
+          <div class="entry-options">
+            <label for="entryType">Select Entry Type:</label>
+            <select id="entryType">
+              <option value="blackBlock">Black Block</option>
+              <option value="team">Team</option>
+            </select>
+          </div>
+          <form id="manualEntryFormData">
+            <div id="blackBlockInput">
+              <label for="startDate">Start Date:</label><br />
+              <input type="date" id="startDate" name="startDate" /><br />
+              <label for="startTime">Start Time:</label><br />
+              <input type="time" id="startTime" name="startTime" /><br />
+              <label for="endDate">End Date:</label><br />
+              <input type="date" id="endDate" name="endDate" /><br />
+              <label for="endTime">End Time:</label><br />
+              <input type="time" id="endTime" name="endTime" /><br />
+              <label for="affectedTeam">Affected Team:</label><br />
+              <input type="text" id="affectedTeam" name="affectedTeam" /><br />
+            </div>
+            <div id="teamInput" style="display: none">
+              <label for="teamName">Team Name:</label><br />
+              <input type="text" id="teamName" name="teamName" /><br />
+            </div>
+            <button type="submit" id="submitBlackBlock">
+              Submit Black Block
+            </button>
+            <button type="submit" id="submitTeam">Submit Team</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    <script src="UI.js"></script>
+    <script src="Logic.js" type="module"></script>
+  </body>
 </html>

@@ -1,3 +1,4 @@
+/* General styles */
 html {
 	height: 100%;
 	width: 100%;
@@ -5,8 +6,6 @@ html {
 
 body {
 	font-family: 'Roboto', sans-serif;
-
-
 	font-size: 16px;
 	font-weight: 400;
 	line-height: 1.6;
@@ -14,60 +13,49 @@ body {
 	margin: 0;
 	background-color: #94dba2;
 	color: #0B7189;
-	/* Text color */
-
-
 }
 
 h1,
 h2,
 h3 {
 	color: #4F000B;
-	/* Primary color for headings */
 	font-family: 'Montserrat', sans-serif;
 }
 
 p,
 h4 {
 	margin-top: 5px;
-	/* Keep the top margin */
 	margin-bottom: 5px;
-	/* Keep the bottom margin */
 	margin-left: 0;
-	/* Remove left margin */
 	margin-right: 0;
-	/* Remove right margin */
 }
 
 .button {
 	background-color: #C19AB7;
-	/* Primary color for buttons */
 	color: #fff;
-	/* Text color for buttons */
 }
 
-/* Example: Adjust font size for smaller screens */
+/* Responsive styles */
 @media screen and (max-width: 768px) {
 	body {
 		font-size: 14px;
 	}
 }
 
-/* Adjust as needed */
+/* Calendar container styles */
 .calendar-container {
 	background-color: #FFFFFF;
-	/* Box background color */
 	padding: 20px;
-	/* Padding around the calendar */
 	border-radius: 10px;
-	/* Rounded corners for the box */
 	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-	/* Optional: Adding a shadow effect */
-	/* Other styles */
+	flex-grow: 1;
+	/* Allow the container to grow and fill available space */
+	margin-right: 20px;
+	/* Add margin between containers */
 }
 
+/* Upload container styles */
 .upload-container {
-	/* Adjust styles as needed */
 	display: inline-block;
 	background-color: #f9f9f9;
 	padding: 10px;
@@ -76,92 +64,74 @@ h4 {
 }
 
 .file-label {
-	/* Center the content and adjust padding */
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	background-color: #f9f9f9;
 	padding: 7px 20px;
-	/* 10px top and bottom, 20px left and right */
 	border-radius: 5px;
 	margin-bottom: 10px;
-	/* Add margin to separate from the Confirm button */
 }
-
 
 .file-label i {
-	/* Adjust icon styles */
 	margin-right: 5px;
-	/* Adding space between icon and text */
 }
 
-/* Hide the original file input */
 #iceSlotInput {
 	display: none;
 }
 
 #confirmButton {
-	/* Additional styles for the Confirm button */
 	padding: 8px 16px;
 	border: none;
 	border-radius: 5px;
 	background-color: #4CAF50;
-	/* Change to your preferred color */
 	color: white;
 	cursor: pointer;
 }
 
 #confirmButton i {
-	/* Adjust icon styles */
 	margin-right: 5px;
-	/* Adding space between icon and text */
 }
 
-/* Update or add this CSS to your existing stylesheet */
-
 .upload-container a {
-	/* Adjust link styles as needed */
 	color: #0B7189;
-	/* Link color */
 	text-decoration: none;
-	/* Remove underline */
 	margin-right: 10px;
-	/* Add spacing between the link and file upload */
 }
 
 .upload-container a:hover {
-	/* Adjust link hover styles */
 	text-decoration: underline;
-	/* Underline on hover */
 }
 
-/* CSS styles for the pop-up container */
-.popup-container {
-	position: fixed;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
-	background-color: rgba(255, 255, 255, 0.9);
+/* Manual entry form styles */
+.manual-entry-form {
+	background-color: #fff;
 	padding: 20px;
-	border: 1px solid #ccc;
-	border-radius: 5px;
-	box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-	z-index: 1000;
+	border-radius: 10px;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+	margin-top: 20px;
 }
 
-/* CSS styles for the pop-up content */
-.popup-content {
-	color: #333;
-	font-size: 16px;
-	line-height: 1.5;
+/* Main container styles */
+.main-container {
+	display: flex;
 }
 
-/* Close button styles - optional */
-.popup-content .close-button {
-	position: absolute;
-	top: 5px;
-	right: 5px;
-	cursor: pointer;
-	color: #999;
-	font-size: 20px;
+/* Manual entry container styles */
+.manual-entry-container {
+	flex-grow: 0;
+	/* Prevent the container from growing */
+}
+
+/* Media query for smaller screens */
+@media screen and (max-width: 768px) {
+
+	.calendar-container,
+	.manual-entry-container {
+		width: 100%;
+		/* Each container takes up 100% of the width on smaller screens */
+		margin-right: 0;
+		/* Remove margin on smaller screens */
+	}
 }
