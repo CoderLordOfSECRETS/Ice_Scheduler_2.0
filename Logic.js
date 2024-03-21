@@ -248,7 +248,7 @@ function calculateIceValue(slot) {
 }
 
 function getMetcalfeTeams(parsedGameSchedule) {
-
+	const teamSet = new Set(); // Use a Set to store unique team names
 	parsedGameSchedule.forEach((game) => {
 		const homeTeam = game.homeTeam.includes("METCALFE JETS")
 			? game.homeTeam.split("METCALFE JETS")[1].trim()
@@ -257,15 +257,24 @@ function getMetcalfeTeams(parsedGameSchedule) {
 			? game.awayTeam.split("METCALFE JETS")[1].trim()
 			: null;
 
-		if (homeTeam && !metcalfeTeams.includes(homeTeam)) {
-			metcalfeTeams.push(homeTeam);
+		if (homeTeam) {
+			const sanitizedTeam = sanitizeTeamName(homeTeam);
+			teamSet.add(sanitizedTeam);
 		}
-		if (awayTeam && !metcalfeTeams.includes(awayTeam)) {
-			metcalfeTeams.push(awayTeam);
+		if (awayTeam) {
+			const sanitizedTeam = sanitizeTeamName(awayTeam);
+			teamSet.add(sanitizedTeam);
 		}
 	});
 
+	metcalfeTeams = Array.from(teamSet); // Convert Set back to Array
 }
+
+function sanitizeTeamName(teamName) {
+	// Remove the number in brackets (if present) and trim whitespace
+	return teamName.replace(/\(\d+\)/g, '').trim();
+}
+
 
 // Schedule practices after ice slots and game schedule are available
 async function schedulePractices() {
@@ -326,10 +335,8 @@ async function schedulePractices() {
 			// Check for game conflicts
 			const gameConflict = parsedGameSchedule.some((game) => {
 				return (
-					(slot.startDateTime.isSameOrAfter(moment(game.date + ' ' + game.time)) &&
-						slot.startDateTime.isSameOrBefore(moment(game.date + ' ' + game.time).add(1, 'hour'))) ||
-					(slot.endDateTime.isSameOrAfter(moment(game.date + ' ' + game.time)) &&
-						slot.endDateTime.isSameOrBefore(moment(game.date + ' ' + game.time).add(1, 'hour')))
+					slot.startDateTime.isSame(moment(game.date), 'day') || // Check if practice date is the same as game date
+					slot.endDateTime.isSame(moment(game.date), 'day')
 				) && (game.homeTeam.includes(team) || game.awayTeam.includes(team));
 			});
 
@@ -368,6 +375,7 @@ async function schedulePractices() {
 	console.log('Scheduled Practices:', scheduledPracticesArray);
 	await convertToCalendarEvents(scheduledPracticesArray);
 }
+
 
 
 function displayEventDetails(details) {
