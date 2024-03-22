@@ -41,14 +41,14 @@ async function fetchAndProcessGameSchedule(link) {
 			}
 
 			return {
-				division,
-				gameId,
-				date,
-				time,
-				venue,
-				homeTeam,
-				awayTeam,
-				gameStatus, // Include the new field in the returned object
+					division,
+					gameId,
+					date,
+					time,
+					venue,
+					homeTeam: sanitizeTeamName(homeTeam),
+					awayTeam: sanitizeTeamName(awayTeam),
+					gameStatus, // Include the new field in the returned object
 			};
 		}
 
