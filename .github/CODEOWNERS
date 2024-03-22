@@ -1,0 +1,3 @@
+# Assigning a code owner for the entire branch
+# Format: branchname  username
+main @CoderLordOfSECRETS
