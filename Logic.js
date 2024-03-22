@@ -1,6 +1,12 @@
+//Element entry zone
+const progressBar = document.getElementById("progress-bar");
+const progressLabel = document.getElementById("progress-label");
+
+
 let metcalfeTeams = [];
 let scheduledPractices;
 let blackBlocks = [];
+let progress = 0;
 
 async function fetchAndProcessGameSchedule(link) {
 	try {
@@ -41,14 +47,14 @@ async function fetchAndProcessGameSchedule(link) {
 			}
 
 			return {
-					division,
-					gameId,
-					date,
-					time,
-					venue,
-					homeTeam: sanitizeTeamName(homeTeam),
-					awayTeam: sanitizeTeamName(awayTeam),
-					gameStatus, // Include the new field in the returned object
+				division,
+				gameId,
+				date,
+				time,
+				venue,
+				homeTeam: sanitizeTeamName(homeTeam),
+				awayTeam: sanitizeTeamName(awayTeam),
+				gameStatus, // Include the new field in the returned object
 			};
 		}
 
@@ -87,6 +93,8 @@ function handleIceSlotUpload() {
 			iceSlots = parseIceSlotData(content);
 			if (iceSlots.length > 0) {
 				console.log("Uploaded Ice Slots:", iceSlots);
+				progress = 25;
+				updateProgressBar();
 				schedulePractices(); // Trigger scheduling after ice slots upload
 			} else {
 				console.error("No ice slots found in the uploaded file.");
@@ -358,6 +366,8 @@ async function schedulePractices() {
 				if (scheduledPracticesBySlot[slot.startDateTime].teamsScheduled === 2) {
 					slot.halfIce = true;
 				}
+				progress = progress + 25 / iceSlots.length;
+				updateProgressBar();
 
 				console.log(`Scheduled practice for ${practice.team} on ${practice.startDateTime} to ${practice.endDateTime}`);
 				scheduled = true;
@@ -495,7 +505,8 @@ async function convertToCalendarEvents(practices) {
 			backgroundColor: "green",
 		});
 	});
-
+	progress = 75;
+	updateProgressBar();
 	addEventsToCalendar(events);
 }
 
@@ -526,7 +537,11 @@ function addEventsToCalendar(events) {
 
 		calendar.addEvent(events[i]);
 	}
+	progress = 99;
+	updateProgressBar();
 	calendar.render();
+	progress = 100;
+	updateProgressBar();
 }
 
 function handleBlackBlockSubmission(event) {
@@ -571,6 +586,12 @@ function handleTeamSubmission(event) {
 		console.error("Team name cannot be empty.");
 	}
 }
+
+function updateProgressBar() {
+	progressBar.value = progress;
+	progressLabel.textContent = `${progress}%`;
+}
+
 
 
 // Entry point: Add event listeners or trigger functions as needed
