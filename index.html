@@ -16,7 +16,7 @@
 		<link href="styles.css" rel="stylesheet" />
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
 		<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
-		<link rel="icon" href="icons/hockeySticks.svg" type="image/svg+xml">
+		<link rel="icon" href="icons/hockeySticks.svg" type="image/svg+xml" />
 	</head>
 
 	<body>
@@ -74,6 +74,11 @@
 				</div>
 			</div>
 		</div>
+		<div id="progress-container">
+			<progress id="progress-bar" value="0" max="100"></progress>
+			<span id="progress-label">0%</span>
+		</div>
+
 		<script src="UI.js"></script>
 		<script src="Logic.js" type="module"></script>
 	</body>
