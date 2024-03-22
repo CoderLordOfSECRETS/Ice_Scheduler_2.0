@@ -1,3 +1,8 @@
+//Element entry zone
+const progressBar = document.getElementById("progress-bar");
+const progressLabel = document.getElementById("progress-label");
+
+
 let metcalfeTeams = [];
 let scheduledPractices;
 let blackBlocks = [];
@@ -42,14 +47,14 @@ async function fetchAndProcessGameSchedule(link) {
 			}
 
 			return {
-					division,
-					gameId,
-					date,
-					time,
-					venue,
-					homeTeam: sanitizeTeamName(homeTeam),
-					awayTeam: sanitizeTeamName(awayTeam),
-					gameStatus, // Include the new field in the returned object
+				division,
+				gameId,
+				date,
+				time,
+				venue,
+				homeTeam: sanitizeTeamName(homeTeam),
+				awayTeam: sanitizeTeamName(awayTeam),
+				gameStatus, // Include the new field in the returned object
 			};
 		}
 
@@ -361,7 +366,7 @@ async function schedulePractices() {
 				if (scheduledPracticesBySlot[slot.startDateTime].teamsScheduled === 2) {
 					slot.halfIce = true;
 				}
-				progress = progress + 25/iceSlots.length;
+				progress = progress + 25 / iceSlots.length;
 				updateProgressBar();
 
 				console.log(`Scheduled practice for ${practice.team} on ${practice.startDateTime} to ${practice.endDateTime}`);
@@ -500,7 +505,7 @@ async function convertToCalendarEvents(practices) {
 			backgroundColor: "green",
 		});
 	});
-progress = 75;
+	progress = 75;
 	updateProgressBar();
 	addEventsToCalendar(events);
 }
@@ -583,11 +588,8 @@ function handleTeamSubmission(event) {
 }
 
 function updateProgressBar() {
-		const progressBar = document.getElementById("progress-bar");
-		const progressLabel = document.getElementById("progress-label");
-
-		progressBar.value = progress;
-		progressLabel.textContent = `${progress}%`;
+	progressBar.value = progress;
+	progressLabel.textContent = `${progress}%`;
 }
 
 
