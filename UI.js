@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", function() {
 	const teamInput = document.getElementById("teamInput");
 	const submitBlackBlockButton = document.getElementById("submitBlackBlock");
 	const submitTeamButton = document.getElementById("submitTeam");
-	const teamnameInput = document.getElementById("teamName")
+	const teamnameInput = document.getElementById("teamName");
 
 	// Hide both buttons initially
 	submitBlackBlockButton.style.display = "none";
@@ -18,12 +18,14 @@ document.addEventListener("DOMContentLoaded", function() {
 		if (entryTypeDropdown.value === "blackBlock") {
 			blackBlockInput.style.display = "block";
 			teamInput.style.display = "none";
+			teamnameInput.style.display = "none";
 			// Show submitBlackBlockButton, hide submitTeamButton
 			submitBlackBlockButton.style.display = "block";
 			submitTeamButton.style.display = "none";
 		} else if (entryTypeDropdown.value === "team") {
 			blackBlockInput.style.display = "none";
 			teamInput.style.display = "block";
+			teamnameInput.style.display = "block";
 			// Show submitTeamButton, hide submitBlackBlockButton
 			submitTeamButton.style.display = "block";
 			submitBlackBlockButton.style.display = "none";
