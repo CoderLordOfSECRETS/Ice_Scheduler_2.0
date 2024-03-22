@@ -2,11 +2,16 @@
 const progressBar = document.getElementById("progress-bar");
 const progressLabel = document.getElementById("progress-label");
 
-
+let globalgameschedule;
 let metcalfeTeams = [];
 let scheduledPractices;
 let blackBlocks = [];
 let progress = 0;
+
+document.addEventListener("DOMContentLoaded", async function() {
+	globalgameschedule = await UnifySchedules()
+	getMetcalfeTeams(globalgameschedule)
+});
 
 async function fetchAndProcessGameSchedule(link) {
 	try {
@@ -276,6 +281,7 @@ function getMetcalfeTeams(parsedGameSchedule) {
 	});
 
 	metcalfeTeams = Array.from(teamSet); // Convert Set back to Array
+	updateAffectedTeamDropdown()
 }
 
 function sanitizeTeamName(teamName) {
@@ -287,9 +293,8 @@ function sanitizeTeamName(teamName) {
 // Schedule practices after ice slots and game schedule are available
 async function schedulePractices() {
 	// Fetch and process the game schedule
-	let parsedGameSchedule = await UnifySchedules()
-	// Extract Metcalfe Jets teams from the game schedule
-	getMetcalfeTeams(parsedGameSchedule);
+	const parsedGameSchedule = globalgameschedule
+
 
 	// Sort available ice slots by start time
 	let availableIceSlots = iceSlots.slice().sort((a, b) => a.startDateTime - b.startDateTime);
@@ -473,7 +478,7 @@ async function convertToCalendarEvents(practices) {
 	const events = [];
 
 	// Add game events
-	const parsedGameSchedule = await UnifySchedules();
+	const parsedGameSchedule = globalgameschedule
 	parsedGameSchedule.forEach((game) => {
 		if (
 			game.homeTeam.includes("METCALFE JETS") ||
@@ -575,6 +580,7 @@ function handleTeamSubmission(event) {
 		// Add the team to the list of Metcalfe teams if not already present
 		if (!metcalfeTeams.includes(teamNameInput)) {
 			metcalfeTeams.push(teamNameInput); // Add the team to the Metcalfe teams array
+			updateAffectedTeamDropdown()
 			console.log("Added team:", teamNameInput);
 		} else {
 			console.warn("Team already exists:", teamNameInput);
@@ -592,7 +598,18 @@ function updateProgressBar() {
 	progressLabel.textContent = `${progress}%`;
 }
 
+function updateAffectedTeamDropdown() {
+	const affectedTeamDropdown = document.getElementById("affectedTeam");
+	affectedTeamDropdown.innerHTML = ""; // Clear existing options
 
+	// Populate dropdown with Metcalfe teams
+	metcalfeTeams.forEach(team => {
+		const option = document.createElement("option");
+		option.value = team;
+		option.textContent = team;
+		affectedTeamDropdown.appendChild(option);
+	});
+}
 
 // Entry point: Add event listeners or trigger functions as needed
 document
