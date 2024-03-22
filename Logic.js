@@ -2,11 +2,15 @@
 const progressBar = document.getElementById("progress-bar");
 const progressLabel = document.getElementById("progress-label");
 
-
+let globalgameschedule;
 let metcalfeTeams = [];
 let scheduledPractices;
 let blackBlocks = [];
 let progress = 0;
+
+document.addEventListener("DOMContentLoaded", async function() {
+	globalgameschedule = await UnifySchedules()
+});
 
 async function fetchAndProcessGameSchedule(link) {
 	try {
@@ -287,7 +291,7 @@ function sanitizeTeamName(teamName) {
 // Schedule practices after ice slots and game schedule are available
 async function schedulePractices() {
 	// Fetch and process the game schedule
-	let parsedGameSchedule = await UnifySchedules()
+	const parsedGameSchedule = globalgameschedule
 	// Extract Metcalfe Jets teams from the game schedule
 	getMetcalfeTeams(parsedGameSchedule);
 
@@ -473,7 +477,7 @@ async function convertToCalendarEvents(practices) {
 	const events = [];
 
 	// Add game events
-	const parsedGameSchedule = await UnifySchedules();
+	const parsedGameSchedule = globalgameschedule
 	parsedGameSchedule.forEach((game) => {
 		if (
 			game.homeTeam.includes("METCALFE JETS") ||
