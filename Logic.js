@@ -10,6 +10,7 @@ let progress = 0;
 
 document.addEventListener("DOMContentLoaded", async function() {
 	globalgameschedule = await UnifySchedules()
+	getMetcalfeTeams(globalgameschedule)
 });
 
 async function fetchAndProcessGameSchedule(link) {
@@ -292,8 +293,7 @@ function sanitizeTeamName(teamName) {
 async function schedulePractices() {
 	// Fetch and process the game schedule
 	const parsedGameSchedule = globalgameschedule
-	// Extract Metcalfe Jets teams from the game schedule
-	getMetcalfeTeams(parsedGameSchedule);
+
 
 	// Sort available ice slots by start time
 	let availableIceSlots = iceSlots.slice().sort((a, b) => a.startDateTime - b.startDateTime);
