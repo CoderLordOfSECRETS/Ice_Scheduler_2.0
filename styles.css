@@ -135,3 +135,44 @@ h4 {
 		/* Remove margin on smaller screens */
 	}
 }
+
+/* Progress container styles */
+#progress-container {
+	display: none;
+	/* Hide the progress container by default */
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	background-color: white;
+	padding: 20px;
+	border-radius: 10px;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+	z-index: 1000;
+	/* Ensure the progress bar appears on top of other content */
+	width: 80%;
+	/* Set a wider width for the progress container */
+}
+
+/* Progress bar styles */
+#progress-bar {
+	width: 100%;
+	/* Make the progress bar fill the container width */
+	height: 30px;
+	/* Increase the height of the progress bar */
+	border: none;
+	border-radius: 15px;
+	/* Make the progress bar rounded */
+	background-color: #f9f9f9;
+	/* Light gray background */
+}
+
+/* Progress label styles */
+#progress-label {
+	display: block;
+	margin-top: 10px;
+	text-align: center;
+	font-size: 14px;
+	color: #4F000B;
+	/* Progress label color */
+}

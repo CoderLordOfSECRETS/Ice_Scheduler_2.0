@@ -36,3 +36,41 @@ document.addEventListener("DOMContentLoaded", function() {
 	var event = new Event("change");
 	entryTypeDropdown.dispatchEvent(event);
 });
+
+// Get the progress container and bar elements
+const progressContainer = document.getElementById("progress-container");
+const progressBar = document.getElementById("progress-bar");
+const progressLabel = document.getElementById("progress-label");
+
+// Function to show the progress bar
+function showProgressBar() {
+	progressContainer.style.display = "block";
+}
+
+// Function to update the progress bar
+function updateProgressBar(progress) {
+	progressBar.value = progress;
+	progressLabel.textContent = `${progress}%`;
+}
+
+// Function to hide the progress bar
+function hideProgressBar() {
+	progressContainer.style.display = "none";
+}
+
+// Example usage:
+// Call showProgressBar() when the confirm button is clicked to show the progress bar
+document.getElementById("confirmButton").addEventListener("click", function() {
+	showProgressBar();
+	// Example: Simulate progress increasing every second
+	let progress = 0;
+	const interval = setInterval(function() {
+		progress += 10; // Increase progress by 10% every second
+		updateProgressBar(progress);
+		if (progress >= 100) {
+			clearInterval(interval);
+			// Example: Hide the progress bar when progress reaches 100%
+			hideProgressBar();
+		}
+	}, 1000);
+});
