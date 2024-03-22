@@ -281,6 +281,7 @@ function getMetcalfeTeams(parsedGameSchedule) {
 	});
 
 	metcalfeTeams = Array.from(teamSet); // Convert Set back to Array
+	updateAffectedTeamDropdown()
 }
 
 function sanitizeTeamName(teamName) {
@@ -579,6 +580,7 @@ function handleTeamSubmission(event) {
 		// Add the team to the list of Metcalfe teams if not already present
 		if (!metcalfeTeams.includes(teamNameInput)) {
 			metcalfeTeams.push(teamNameInput); // Add the team to the Metcalfe teams array
+			updateAffectedTeamDropdown()
 			console.log("Added team:", teamNameInput);
 		} else {
 			console.warn("Team already exists:", teamNameInput);
@@ -596,7 +598,18 @@ function updateProgressBar() {
 	progressLabel.textContent = `${progress}%`;
 }
 
+function updateAffectedTeamDropdown() {
+	const affectedTeamDropdown = document.getElementById("affectedTeam");
+	affectedTeamDropdown.innerHTML = ""; // Clear existing options
 
+	// Populate dropdown with Metcalfe teams
+	metcalfeTeams.forEach(team => {
+		const option = document.createElement("option");
+		option.value = team;
+		option.textContent = team;
+		affectedTeamDropdown.appendChild(option);
+	});
+}
 
 // Entry point: Add event listeners or trigger functions as needed
 document
