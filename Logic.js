@@ -7,6 +7,7 @@ let metcalfeTeams = [];
 let scheduledPractices;
 let blackBlocks = [];
 let progress = 0;
+let isCalendarReady = false;
 
 document.addEventListener("DOMContentLoaded", async function() {
 	globalgameschedule = await UnifySchedules()
@@ -437,8 +438,6 @@ function displayEventDetails(details) {
 }
 
 
-let isCalendarReady = false;
-
 let calendar;
 document.addEventListener("DOMContentLoaded", function() {
 	const calendarEl = document.getElementById("calendar");
@@ -478,7 +477,7 @@ async function convertToCalendarEvents(practices) {
 	const events = [];
 
 	// Add game events
-	const parsedGameSchedule = globalgameschedule
+	const parsedGameSchedule = globalgameschedule;
 	parsedGameSchedule.forEach((game) => {
 		if (
 			game.homeTeam.includes("METCALFE JETS") ||
@@ -488,7 +487,7 @@ async function convertToCalendarEvents(practices) {
 				title: `${game.homeTeam} vs ${game.awayTeam}`,
 				start: moment(
 					`${game.date} ${game.time}`,
-					"YYYY-MM-DD HH:mm",
+					"YYYY-MM-DD HH:mm"
 				).toISOString(),
 				end: moment(`${game.date} ${game.time}`, "YYYY-MM-DD HH:mm")
 					.add(1, "hours")
@@ -510,10 +509,43 @@ async function convertToCalendarEvents(practices) {
 			backgroundColor: "green",
 		});
 	});
+
+	// Add unused ice slots as events in red
+	const unusedIceSlotEvents = findUnusedIceSlots(practices);
+	events.push(...unusedIceSlotEvents);
+
 	progress = 75;
 	updateProgressBar();
 	addEventsToCalendar(events);
 }
+
+function findUnusedIceSlots(practices) {
+	const unusedIceSlotEvents = [];
+
+	iceSlots.forEach((slot) => {
+		const slotStart = slot.startDateTime.toISOString();
+		const slotEnd = slot.endDateTime.toISOString();
+
+		// Check if this slot is not used for any practice or game
+		const isUnused = !practices.some(
+			(practice) =>
+				practice.startDateTime.toISOString() === slotStart &&
+				practice.endDateTime.toISOString() === slotEnd
+		);
+
+		if (isUnused) {
+			unusedIceSlotEvents.push({
+				title: "Unused Ice Slot",
+				start: slotStart,
+				end: slotEnd,
+				backgroundColor: "red",
+			});
+		}
+	});
+
+	return unusedIceSlotEvents;
+}
+
 
 function waitForCalendarReady() {
 	return new Promise((resolve) => {
