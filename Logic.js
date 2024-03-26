@@ -294,12 +294,12 @@ function sanitizeTeamName(teamName) {
 // Schedule practices after ice slots and game schedule are available
 async function schedulePractices() {
 	// Fetch and process the game schedule
-	const parsedGameSchedule = globalgameschedule
-
+	const parsedGameSchedule = globalgameschedule;
 
 	// Sort available ice slots by start time
 	let availableIceSlots = iceSlots.slice().sort((a, b) => a.startDateTime - b.startDateTime);
 
+	let fullyConflictingTeams = [];
 	// Initialize an object to track scheduled practices by slot
 	const scheduledPracticesBySlot = {};
 
@@ -320,76 +320,104 @@ async function schedulePractices() {
 		teamsIceValues[team] = 0;
 	});
 
-	// Schedule practices for each Metcalfe Jets team
-	for (const team of metcalfeTeams) {
-		let scheduled = false;
+	// Flag to track if any ice slots remain unscheduled
+	let iceSlotsRemain = true;
 
-		// Sort available ice slots by ice value
-		const availableSlotsSortedByIceValue = Object.values(scheduledPracticesBySlot)
-			.filter((slot) => slot.iceValue > 0 && slot.teamsScheduled < 2 && slot.practices.every((practice) => practice.team !== team)) // Filter out slots already scheduled for this team
-			.sort((a, b) => b.iceValue - a.iceValue); // Sort in descending order of ice value
+	// Flag to track if all teams are marked as fully conflicting
+	let allTeamsFullyConflicting = false;
 
-		// Find a suitable slot for the team
-		for (const slotEntry of availableSlotsSortedByIceValue) {
-			const slot = slotEntry.slot;
+	// Loop until either all ice slots are scheduled or all teams are marked as fully conflicting
+	while (iceSlotsRemain && !allTeamsFullyConflicting) {
+		let leastIceTeam = null;
+		let leastIceValue = Infinity;
 
-			// Check for black block conflicts
+		// Find the team with the least ice value
+		for (const team of metcalfeTeams) {
+			if (teamsIceValues[team] < leastIceValue && !fullyConflictingTeams.includes(team)) {
+				leastIceTeam = team;
+				leastIceValue = teamsIceValues[team];
+			}
+		}
+
+		if (!leastIceTeam) {
+			allTeamsFullyConflicting = true;
+			break; // No team with least ice value found, exit loop
+		}
+
+		let iceSlotScheduled = false;
+
+		// Iterate over each ice slot
+		for (const slot of availableIceSlots) {
+			// Check for black block conflicts and game conflicts for this team
 			const blackBlockConflict = blackBlocks.some((blackBlock) => {
 				return (
 					slot.startDateTime.isSameOrAfter(moment(blackBlock.startDate + ' ' + blackBlock.startTime)) &&
 					slot.endDateTime.isSameOrBefore(moment(blackBlock.endDate + ' ' + blackBlock.endTime)) &&
-					slot.arena === blackBlock.affectedTeam
+					slot.arena === blackBlock.affectedTeam &&
+					leastIceTeam === blackBlock.affectedTeam
 				);
 			});
 
-			if (blackBlockConflict) {
-				continue; // Skip this slot if there's a black block conflict
-			}
-
-			// Check for game conflicts
 			const gameConflict = parsedGameSchedule.some((game) => {
 				return (
-					slot.startDateTime.isSame(moment(game.date), 'day') || // Check if practice date is the same as game date
-					slot.endDateTime.isSame(moment(game.date), 'day')
-				) && (game.homeTeam.includes(team) || game.awayTeam.includes(team));
+					slot.startDateTime.isSame(moment(game.date), 'day') &&
+					(game.homeTeam.includes(leastIceTeam) || game.awayTeam.includes(leastIceTeam))
+				);
 			});
 
-			if (!gameConflict) {
+			if (!blackBlockConflict && !gameConflict && scheduledPracticesBySlot[slot.startDateTime].teamsScheduled < 2) {
 				const slotDurationHours = slot.endDateTime.diff(slot.startDateTime, 'hours', true);
 				const practiceDuration = Math.min(Math.max(slotDurationHours, 1), 1.5); // Ensure practice duration is between 1 and 1.5 hours
 
-				// Schedule the practice
-				const practice = {
-					team: `METCALFE JETS ${team}`,
-					startDateTime: slot.startDateTime.clone(),
-					endDateTime: slot.startDateTime.clone().add(practiceDuration, 'hours'),
-				};
-
-				// Update scheduled practices, teams' ice values, and the number of teams scheduled on this slot
-				scheduledPracticesBySlot[slot.startDateTime].practices.push(practice);
-				teamsIceValues[team] += practiceDuration;
-				scheduledPracticesBySlot[slot.startDateTime].teamsScheduled++;
-				if (scheduledPracticesBySlot[slot.startDateTime].teamsScheduled === 2) {
-					slot.halfIce = true;
+				if (scheduledPracticesBySlot[slot.startDateTime].teamsScheduled === 0 &&
+					teamsIceValues[leastIceTeam] - getNextLeastIceValue(leastIceTeam) >= slot.iceValue) {
+					// Schedule as full ice practice
+					const practice = {
+						team: `METCALFE JETS ${leastIceTeam}`,
+						startDateTime: slot.startDateTime.clone(),
+						endDateTime: slot.endDateTime.clone(),
+						halfIce: false,
+					};
+					scheduledPracticesBySlot[slot.startDateTime].practices.push(practice);
+					teamsIceValues[leastIceTeam] += slot.iceValue;
+					scheduledPracticesBySlot[slot.startDateTime].teamsScheduled = 2;
+					iceSlotScheduled = true;
+					break; // Move to next team
+				} else {
+					// Schedule as half ice practice
+					const practice = {
+						team: `METCALFE JETS ${leastIceTeam}`,
+						startDateTime: slot.startDateTime.clone(),
+						endDateTime: slot.startDateTime.clone().add(practiceDuration / 2, 'hours'),
+						halfIce: true,
+					};
+					scheduledPracticesBySlot[slot.startDateTime].practices.push(practice);
+					teamsIceValues[leastIceTeam] += slot.iceValue / 2;
+					scheduledPracticesBySlot[slot.startDateTime].teamsScheduled++;
+					iceSlotScheduled = true;
+					break; // Move to next team
 				}
-				progress = progress + 25 / iceSlots.length;
-				updateProgressBar();
-
-				console.log(`Scheduled practice for ${practice.team} on ${practice.startDateTime} to ${practice.endDateTime}`);
-				scheduled = true;
-				break;
 			}
 		}
 
-		if (!scheduled) {
-			console.warn(`No suitable ice slot found for ${team}.`);
+		if (!iceSlotScheduled) {
+			fullyConflictingTeams.push(leastIceTeam); // Mark this team as fully conflicting
 		}
+
+		// Check if any ice slots remain unscheduled
+		iceSlotsRemain = availableIceSlots.some(slot => scheduledPracticesBySlot[slot.startDateTime].teamsScheduled < 2);
 	}
 
-	// Convert scheduled practices to calendar events
-	const scheduledPracticesArray = Object.values(scheduledPracticesBySlot).flatMap((entry) => entry.practices);
-	console.log('Scheduled Practices:', scheduledPracticesArray);
-	await convertToCalendarEvents(scheduledPracticesArray);
+	// Call convertToCalendarEvents if all ice slots are scheduled or all teams are marked as fully conflicting
+	if (!iceSlotsRemain || allTeamsFullyConflicting) {
+		await convertToCalendarEvents(Object.values(scheduledPracticesBySlot).flatMap(entry => entry.practices));
+	}
+}
+
+function getNextLeastIceValue(currentTeam) {
+	const teamValues = Object.entries(teamsIceValues).filter(([team, value]) => team !== currentTeam && !fullyConflictingTeams.includes(team));
+	const sortedValues = teamValues.sort((a, b) => a[1] - b[1]);
+	return sortedValues.length > 0 ? sortedValues[0][1] : 0;
 }
 
 
