@@ -327,6 +327,13 @@ async function schedulePractices() {
 	let allTeamsFullyConflicting = false;
 
 	// Loop until either all ice slots are scheduled or all teams are marked as fully conflicting
+
+	function getNextLeastIceValue(currentTeam) {
+		const teamValues = Object.entries(teamsIceValues).filter(([team, value]) => team !== currentTeam && !fullyConflictingTeams.includes(team));
+		const sortedValues = teamValues.sort((a, b) => a[1] - b[1]);
+		return sortedValues.length > 0 ? sortedValues[0][1] : 0;
+	}
+
 	while (iceSlotsRemain && !allTeamsFullyConflicting) {
 		let leastIceTeam = null;
 		let leastIceValue = Infinity;
@@ -414,11 +421,7 @@ async function schedulePractices() {
 	}
 }
 
-function getNextLeastIceValue(currentTeam) {
-	const teamValues = Object.entries(teamsIceValues).filter(([team, value]) => team !== currentTeam && !fullyConflictingTeams.includes(team));
-	const sortedValues = teamValues.sort((a, b) => a[1] - b[1]);
-	return sortedValues.length > 0 ? sortedValues[0][1] : 0;
-}
+
 
 
 
